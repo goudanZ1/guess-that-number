@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>猜数游戏</title>
+	<style>
+		html {
+			color-scheme: light dark;
+		}
+
+		body {
+			width: 35em;
+			margin: 0 auto;
+			padding: 2em;
+			font-size: 20px;
+			font-family: Verdana, Arial, sans-serif;
+			line-height: 1.5;
+		}
+
+		.h-center {
+			text-align: center;
+		}
+
+		.top-margin {
+			margin-top: 40px;
+		}
+
+		.masked {
+			background-color: black;
+			color: white;
+			padding-left: 5px;
+			padding-right: 5px;
+		}
+
+		.inputbox {
+			width: 200px;
+			height: 35px;
+			font-size: 20px;
+			padding-left: 10px;
+		}
+
+		.button {
+			margin-left: 10px;
+			font-size: 20px;
+		}
+
+		.result {
+			color: red;
+		}
+
+		table {
+			margin-top: 10px;
+			margin-left: 15px;
+		}
+
+		td {
+			text-align: center;
+			padding-left: 25px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="h-center">
+		<h2>猜数游戏</h2>
+		<h3>Guess that number!</h3>
+	</div>
+
+	<p>游戏规则：<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;我会随便想一个 1 到 100
+		之间的整数并写在下面。您每次可以猜测一个整数，如果没有猜中，我会告诉您这个数相比我写下的数是大了还是小了（可以在页面底部查看您的猜测记录）。如果您在 6 次之内猜中了我写的数，那么您就获胜了，并且可以获得 250
+		元现金奖励～</p>
+
+	<p>那我开始写了！这个整数就是：
+		<span class="masked" id="answer">??</span>
+		（不要偷看哦）
+	</p>
+
+	<div class="h-center">
+		<p class="top-margin" id="prompt">如果您准备好了，就开始猜吧！^_^</p>
+		<form id="submitForm" onsubmit="handleSubmit(event)">
+			<input type="number" step="1" class="inputbox" id="userInput" name="userInput" placeholder="请输入整数" required>
+			<button type="submit" class="button">猜测</button>
+		</form>
+		<b>
+			<p class="result" id="compareResult"></p>
+		</b>
+	</div>
+
+	您的猜测记录：
+
+	<table id="recordTable">
+		<tbody>
+		</tbody>
+	</table>
+
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+
+	<script>
+		var trytime = 0;
+		var minpossible = 1;
+		var maxpossible = 100;
+
+		function handleSubmit(event) {
+			event.preventDefault();
+			var inputString = document.getElementById('userInput').value;
+			var guessInt = parseInt(inputString, 10);
+			if (!isNaN(guessInt)) {
+				trytime = trytime + 1;
+				var recordResult;
+				const promptDiv = document.getElementById('prompt');
+				const resultDiv = document.getElementById('compareResult');
+				const form = document.getElementById('submitForm');
+				const tableBody = document.querySelector('#recordTable tbody');
+				form.reset();
+
+				if (trytime > 6) {
+					promptDiv.textContent = "人类，别猜了，答案都告诉你了 =_=";
+					return;
+				}
+
+				if (2 * guessInt > minpossible + maxpossible) {
+					recordResult = "大了";
+					resultDiv.textContent = "第 " + String(trytime) + " 次猜测：大了";
+					maxpossible = Math.min(maxpossible, guessInt - 1);
+				}
+				else {
+					recordResult = "小了";
+					resultDiv.textContent = "第 " + String(trytime) + " 次猜测：小了";
+					minpossible = Math.max(minpossible, guessInt + 1);
+				}
+
+				const newRow = document.createElement('tr');
+				newRow.innerHTML = `
+					<td>第 ${trytime} 次猜测:</td>
+                	<td>${guessInt}</td>
+                    <td>${recordResult}</td>
+            	`;
+				tableBody.appendChild(newRow);
+
+				if (trytime == 1) {
+					promptDiv.textContent = "万事开头难，加油！";
+				}
+				else if (trytime == 2) {
+					promptDiv.textContent = "已经两次机会了哦～";
+				}
+				else if (trytime == 3) {
+					promptDiv.textContent = "不错啊，范围大大缩小了！";
+				}
+				else if (trytime == 4) {
+					promptDiv.textContent = "已经很接近了！";
+				}
+				else if (trytime == 5) {
+					promptDiv.textContent = "还剩一次机会，感觉肯定要猜到了QAQ";
+				}
+				else if (trytime == 6) {
+					var finalAnswer = Math.floor(Math.random() * (maxpossible - minpossible + 1)) + minpossible;
+					promptDiv.textContent = "太可惜了，您没有猜中！^_^ 我写的是：" + String(finalAnswer);
+					const ansDiv = document.getElementById('answer');
+					ansDiv.textContent = String(finalAnswer);
+
+					const newButton = document.createElement('button');
+					newButton.type = 'button';
+					newButton.textContent = '重试';
+					newButton.className = 'button';
+					newButton.onclick = function () {
+						window.location.reload();
+					};
+					form.appendChild(newButton);
+				}
+			}
+		}		
+	</script>
+</body>
+
+</html>
